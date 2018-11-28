@@ -1,0 +1,6 @@
+github.com/karrick/godirwalk v1.7.5 h1:JQFiMR65pT543bkWP46+k194gS999qo/OYccos9cOXg=
+github.com/karrick/godirwalk v1.7.5/go.mod h1:2c9FRhkDxdIbgkOnCEvnSWs71Bhugbl46shStcFDJ34=
+github.com/pkg/errors v0.8.0 h1:WdK/asTD0HN+q6hsWO3/vpuAkAr+tw6aNJNDFFf0+qw=
+github.com/pkg/errors v0.8.0/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
+github.com/rwcarlsen/goexif v0.0.0-20180518182100-8d986c03457a h1:ZDZdsnbMuRSoVbq1gR47o005lfn2OwODNCr23zh9gSk=
+github.com/rwcarlsen/goexif v0.0.0-20180518182100-8d986c03457a/go.mod h1:hPqNNc0+uJM6H+SuU8sEs5K5IQeKccPqeSjfgcKGgPk=
