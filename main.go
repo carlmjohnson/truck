@@ -38,7 +38,7 @@ func exec() error {
 	for _, path := range paths {
 		date, err := getEXIFDate(path)
 		if err != nil {
-			fmt.Fprint(os.Stderr, "err at %q: %v", path, err)
+			fmt.Fprintf(os.Stderr, "err at %q: %v", path, err)
 			continue
 		}
 		dir := filepath.Dir(path)
@@ -47,11 +47,11 @@ func exec() error {
 			continue
 		}
 		if _, err := os.Stat(newpath); !os.IsNotExist(err) {
-			fmt.Fprint(os.Stderr, "cannot rename %q to %q", path, newpath)
+			fmt.Fprintf(os.Stderr, "cannot rename %q to %q", path, newpath)
 			continue
 		}
 		if err = os.Rename(path, newpath); err != nil {
-			fmt.Fprint(os.Stderr, "err at %q: %v", path, err)
+			fmt.Fprintf(os.Stderr, "err at %q: %v", path, err)
 		}
 	}
 	return nil
