@@ -36,20 +36,19 @@ func exec() error {
 	}
 
 	for _, path := range paths {
-		date, err := getEXIFDate(path)
+		newpath, err := makeNewPath(path)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "err at %q: %v", path, err)
+			fmt.Fprintf(os.Stderr, "problem with %q: %v\n", path, err)
 			continue
 		}
-		dir := filepath.Dir(path)
-		newpath := filepath.Join(dir, fmt.Sprintf("%d.jpg", date.Unix()))
 		if newpath == path {
 			continue
 		}
 		if _, err := os.Stat(newpath); !os.IsNotExist(err) {
-			fmt.Fprintf(os.Stderr, "cannot rename %q to %q", path, newpath)
+			fmt.Fprintf(os.Stderr, "cannot rename %q to %q\n", path, newpath)
 			continue
 		}
+		fmt.Fprintf(os.Stderr, "Moving %q → %q\n", path, newpath)
 		if err = os.Rename(path, newpath); err != nil {
 			fmt.Fprintf(os.Stderr, "err at %q: %v", path, err)
 		}
@@ -72,6 +71,17 @@ func listFiles(root string, matchDir, matchFile func(string) bool) (paths []stri
 			return nil
 		},
 	})
+	return
+}
+
+func makeNewPath(path string) (newpath string, err error) {
+	var date time.Time
+	date, err = getEXIFDate(path)
+	if err != nil {
+		return
+	}
+	dir := filepath.Dir(path)
+	newpath = filepath.Join(dir, fmt.Sprintf("%s.jpg", date.Format("2006-01-02-150405")))
 	return
 }
 
