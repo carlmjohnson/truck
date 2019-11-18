@@ -108,10 +108,12 @@ func (a *app) exec() error {
 		if a.dryrun {
 			fmt.Printf("mv %q %q\n", path, newPath)
 		}
-		if newPath == "" {
+		if newPath == "" || a.dryrun {
 			continue
 		}
-		// err := move(newPath, path)
+		if err = a.move(newPath, path); err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -164,4 +166,34 @@ func (fd fileData) Exif() (*exif.Exif, error) {
 
 	e, _ := exif.Decode(f)
 	return e, nil
+}
+
+func (a *app) move(newPath, oldPath string) error {
+	oldPath, err := filepath.Abs(oldPath)
+	if err != nil {
+		return err
+	}
+	newPath, err = filepath.Abs(newPath)
+	if err != nil {
+		return err
+	}
+	if newPath == oldPath {
+		a.Printf("skipping %q == %q", oldPath, newPath)
+		return nil
+	}
+
+	dir := filepath.Dir(newPath)
+	if err = os.MkdirAll(dir, os.ModePerm); err != nil {
+		a.Printf("could not make containing path %q", dir)
+		// probably going to fail but go on anyway
+	}
+
+	// todo: overwrite mode
+	if _, err := os.Stat(newPath); !os.IsNotExist(err) {
+		a.Printf("cannot rename %q → %q\n", oldPath, newPath)
+		return nil
+	}
+
+	a.Printf("moving %q → %q", oldPath, newPath)
+	return os.Rename(oldPath, newPath)
 }
