@@ -31,7 +31,11 @@ func CLI(args []string) error {
 
 func parseArgs(args []string) (*app, error) {
 	fl := flag.NewFlagSet(AppName, flag.ContinueOnError)
+	// TODO: Copy files
+	// todo: Overwrite mode
+	// todo: relative to original directory?
 	dryrun := fl.Bool("dryrun", false, `just output changes to stdout`)
+	silent := fl.Bool("silent", false, `don't log what changed to stdout`)
 	useNull := fl.Bool("0", false, `use null character as filename separator`)
 	l := log.New(nil, AppName+" ", log.LstdFlags)
 	fl.Var(
@@ -46,6 +50,14 @@ func parseArgs(args []string) (*app, error) {
 Truck expects to receive a list of files to move from standard input, typically by piping "ls" or "find".
 
 	truck [options] <mv-pattern>
+
+<mv-pattern> is a Go text template describing how to transform the source file into the destination name.
+
+Example:
+
+$ find . -name '*.go' -print0 | truck -0 '{{.Dir}}/{{.BaseName}}_bak.go'
+mv "./truckapp/app.go" "/src/truck/truckapp/app_bak.go"
+mv "./main.go" "/src/truck/main_bak.go"
 
 Options:
 `)
@@ -70,14 +82,20 @@ Options:
 	if *useNull {
 		sep = "\x00"
 	}
-	a := app{t, sep, *dryrun, l}
+	a := app{
+		t:      t,
+		sep:    sep,
+		dryrun: *dryrun,
+		silent: *silent,
+		Logger: l,
+	}
 	return &a, nil
 }
 
 type app struct {
-	t      *template.Template
-	sep    string
-	dryrun bool
+	t              *template.Template
+	sep            string
+	dryrun, silent bool
 	*log.Logger
 }
 
@@ -100,21 +118,29 @@ func (a *app) exec() error {
 	}
 	a.Printf("got %d path(s)", len(paths))
 
-	for _, path := range paths {
-		newPath, err := a.buildPath(path)
+	m := 0
+	for _, oldPath := range paths {
+		newPath, err := a.buildPath(oldPath)
 		if err != nil {
 			return err
 		}
-		if a.dryrun {
-			fmt.Printf("mv %q %q\n", path, newPath)
-		}
-		if newPath == "" || a.dryrun {
+		if newPath == "" {
+			a.Printf(`skipping %q == ""`, oldPath)
 			continue
 		}
-		if err = a.move(newPath, path); err != nil {
+		if !a.silent {
+			fmt.Printf("mv %q %q\n", oldPath, newPath)
+		}
+		if a.dryrun {
+			continue
+		}
+		if err = a.move(newPath, oldPath); err != nil {
 			return err
 		}
+		m++
 	}
+
+	a.Printf("moved %d file(s)", m)
 	return nil
 }
 
