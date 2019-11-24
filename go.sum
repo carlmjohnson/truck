@@ -5,6 +5,8 @@ github.com/carlmjohnson/flagext v0.0.6 h1:JX3Qx+7hspQ1Lzlt2bLlg2Ezug3WK/oapgtQaG
 github.com/carlmjohnson/flagext v0.0.6/go.mod h1:Eenv0epIUAr4NuedNmkzI8WmBmjIxZC239XcKxYS2ac=
 github.com/carlmjohnson/go-cli v0.0.0-20191024172610-66ed1fca11d2 h1:L6UmIrrym200SfjBwtPSRe8JV/ta8v/ykyFbCmJBr24=
 github.com/carlmjohnson/go-cli v0.0.0-20191024172610-66ed1fca11d2/go.mod h1:OrWdrsDu0yvJL9BGQ6EntdcomjjdcV6H3Stn6Xxw7dk=
+github.com/djherbis/times v1.2.0 h1:xANXjsC/iBqbO00vkWlYwPWgBgEVU6m6AFYg0Pic+Mc=
+github.com/djherbis/times v1.2.0/go.mod h1:CGMZlo255K5r4Yw0b9RRfFQpM2y7uOmxg4jm9HsaVf8=
 github.com/karrick/godirwalk v1.13.0 h1:GJq8GHQEAPsjwqfGhLNXBO5P0dS2HYdDRVWe+P4E/EQ=
 github.com/karrick/godirwalk v1.13.0/go.mod h1:H5KPZjojv4lE+QYImBI8xVtrBRgYrIVsaRPx4tDPEn4=
 github.com/mitchellh/go-wordwrap v1.0.0/go.mod h1:ZXFpozHsX6DPmq2I0TCekCxypsnAUbP2oI0UX1GXzOo=

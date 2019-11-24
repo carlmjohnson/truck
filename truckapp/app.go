@@ -11,6 +11,7 @@ import (
 	"text/template"
 
 	"github.com/carlmjohnson/flagext"
+	"github.com/djherbis/times"
 	"github.com/peterbourgon/ff"
 	"github.com/rwcarlsen/goexif/exif"
 )
@@ -58,6 +59,10 @@ Example:
 $ find . -name '*.go' -print0 | truck -0 '{{.Dir}}/{{.BaseName}}_bak.go'
 mv "./truckapp/app.go" "/src/truck/truckapp/app_bak.go"
 mv "./main.go" "/src/truck/main_bak.go"
+
+$ find . -name '*.go'|truck '{{.Dir}}/{{printf "%02d" .N}}-{{.Times.ModTime.Format "2006_01_02"}}-{{.BaseName}}_bak{{.Ext}}'
+mv "./truckapp/app.go" "/src/truck/truckapp/01-2019_11_24-app_bak.go"
+mv "./main.go" "/src/truck/02-2019_11_18-main_bak.go"
 
 Options:
 `)
@@ -118,9 +123,9 @@ func (a *app) exec() error {
 	}
 	a.Printf("got %d path(s)", len(paths))
 
-	m := 0
+	n := 0
 	for _, oldPath := range paths {
-		newPath, err := a.buildPath(oldPath)
+		newPath, err := a.buildPath(n, oldPath)
 		if err != nil {
 			return err
 		}
@@ -129,26 +134,30 @@ func (a *app) exec() error {
 			continue
 		}
 		if !a.silent {
+			a.Println("mv command equiv:")
 			fmt.Printf("mv %q %q\n", oldPath, newPath)
 		}
+		n++
 		if a.dryrun {
 			continue
 		}
 		if err = a.move(newPath, oldPath); err != nil {
 			return err
 		}
-		m++
 	}
-
-	a.Printf("moved %d file(s)", m)
+	var would string
+	if a.dryrun {
+		would = "would have "
+	}
+	a.Printf("%smoved %d file(s)", would, n)
 	return nil
 }
 
-func (a *app) buildPath(old string) (string, error) {
+func (a *app) buildPath(i int, old string) (string, error) {
 	a.Printf("building path for %q", old)
 
 	var buf strings.Builder
-	data, err := dataFor(old)
+	data, err := dataFor(i, old)
 	if err != nil {
 		return "", err
 	}
@@ -159,7 +168,7 @@ func (a *app) buildPath(old string) (string, error) {
 	return buf.String(), nil
 }
 
-func dataFor(raw string) (interface{}, error) {
+func dataFor(i int, raw string) (interface{}, error) {
 	abs, err := filepath.Abs(raw)
 	if err != nil {
 		return nil, err
@@ -170,13 +179,26 @@ func dataFor(raw string) (interface{}, error) {
 	basename := base[:len(base)-len(ext)]
 
 	data := fileData{
-		raw, abs, dir, base, ext, basename,
+		i, raw, abs, dir, base, ext, basename,
 	}
 	return data, nil
 }
 
 type fileData struct {
+	i                                  int
 	Raw, Abs, Dir, Base, Ext, BaseName string
+}
+
+func (fd fileData) I() int {
+	return fd.i
+}
+
+func (fd fileData) N() int {
+	return fd.i + 1
+}
+
+func (fd fileData) Times() (times.Timespec, error) {
+	return times.Stat(fd.Raw)
 }
 
 func (fd fileData) Stat() (os.FileInfo, error) {
