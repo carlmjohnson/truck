@@ -46,7 +46,7 @@ func parseArgs(args []string) (*app, error) {
 	)
 
 	fl.Usage = func() {
-		fmt.Fprintf(fl.Output(), `Truck moves files from point A to point B.
+		fmt.Fprintln(fl.Output(), `Truck moves files from point A to point B.
 
 Truck expects to receive a list of files to move from standard input, typically by piping "ls" or "find".
 
